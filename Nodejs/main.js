@@ -40,29 +40,31 @@ app.get('/', (request, response) => {
   response.end(html);
 });
 
-app.get('/page/:pageId', (request, response) => {
-  var _url = request.url;
+app.get('/page/:pageId', (request, response, next) => {
   var queryData = request.params.pageId;
-  var pathname = url.parse(_url, true).pathname;
   var filteredId = path.parse(queryData).base;
   fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
-    var title = queryData;
-    var sanitizedTitle = sanitizeHtml(title);
-    var sanitizedDescription = sanitizeHtml(description, {
-      allowedTags:['h1']
-    });
-    var list = template.list(request.list);
-    var html = template.HTML(sanitizedTitle, list,
-      `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
-      ` <a href="/create">create</a>
-        <a href="/update/${sanitizedTitle}">update</a>
-        <form action="/delete_process" method="post">
-          <input type="hidden" name="id" value="${sanitizedTitle}">
-          <input type="submit" value="delete">
-        </form>`
-    );
-    response.writeHead(200);
-    response.end(html);
+    if (err) {
+      next(err);
+    } else {
+      var title = queryData;
+      var sanitizedTitle = sanitizeHtml(title);
+      var sanitizedDescription = sanitizeHtml(description, {
+        allowedTags:['h1']
+      });
+      var list = template.list(request.list);
+      var html = template.HTML(sanitizedTitle, list,
+        `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
+        ` <a href="/create">create</a>
+          <a href="/update/${sanitizedTitle}">update</a>
+          <form action="/delete_process" method="post">
+            <input type="hidden" name="id" value="${sanitizedTitle}">
+            <input type="submit" value="delete">
+          </form>`
+      );
+      response.writeHead(200);
+      response.end(html);
+    }
   });
 });
 
@@ -98,25 +100,29 @@ app.get('/update/:pageId', (request, response) => {
   
   var filteredId = path.parse(request.params.pageId).base;
   fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
-    var title = filteredId;
-    var list = template.list(request.list);
-    var html = template.HTML(title, list,
-      `
-      <form action="/update_process" method="post">
-        <input type="hidden" name="id" value="${title}">
-        <p><input type="text" name="title" placeholder="title" value="${title}"></p>
-        <p>
-          <textarea name="description" placeholder="description">${description}</textarea>
-        </p>
-        <p>
-          <input type="submit">
-        </p>
-      </form>
-      `,
-      `<a href="/create">create</a> <a href="/update/${title}">update</a>`
-    );
-    response.writeHead(200);
-    response.end(html);
+    if (err) {
+      next(err);
+    } else {
+      var title = filteredId;
+      var list = template.list(request.list);
+      var html = template.HTML(title, list,
+        `
+        <form action="/update_process" method="post">
+          <input type="hidden" name="id" value="${title}">
+          <p><input type="text" name="title" placeholder="title" value="${title}"></p>
+          <p>
+            <textarea name="description" placeholder="description">${description}</textarea>
+          </p>
+          <p>
+            <input type="submit">
+          </p>
+        </form>
+        `,
+        `<a href="/create">create</a> <a href="/update/${title}">update</a>`
+      );
+      response.writeHead(200);
+      response.end(html);
+    } 
   });
 });
 
@@ -141,6 +147,14 @@ app.post('/delete_process', (request, response) => {
   });
 });
 
+// because middlewares execute in order, error handling comes last
+app.use(function(request, response, next){
+  response.status(404).send("Sorry, the page cannot be found");
+});
+
+app.use(function(err, request, response, next) {
+  response.status(500).send("Something broke!");
+});
 /*
 var app = http.createServer(function(request,response){
     var _url = request.url;
