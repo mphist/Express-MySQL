@@ -1,9 +1,13 @@
 var fs = require('fs');
 var bodyParser = require('body-parser');
-const express = require('express');
-const app = express();
+var express = require('express');
+var app = express();
 var topicRouter = require('./routes/topic');
 var indexRouter = require('./routes/index');
+var helmet = require('helmet');
+
+// Use the Helmet middleware for security - displaying raw html?
+//app.use(helmet());
 
 // middleware functions have access to the request and response objects.
 
