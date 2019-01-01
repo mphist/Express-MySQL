@@ -5,6 +5,15 @@ var app = express();
 var topicRouter = require('./routes/topic');
 var indexRouter = require('./routes/index');
 var helmet = require('helmet');
+var mysql = require('mysql');
+var connection = mysql.createConnection({
+  host : 'localhost',
+  user : 'root',
+  password : 'test',
+  database : 'opentutorials'  
+});
+
+connection.connect();
 
 // Use the Helmet middleware for security - displaying raw html?
 //app.use(helmet());
@@ -14,29 +23,36 @@ var helmet = require('helmet');
 // use the body-parser middleware
 app.use(bodyParser.urlencoded({ extended: false}));
 
-// use a custom middleware - for all app.get only
-// this shows that all the app.get I previously wrote are actually using the custom middleware pertaining to that particular app.get
-app.get('*', function(request, response, next) {
-  fs.readdir('./data', function(error, filelist) {
-    request.list = filelist;
-    next();
-  });
-});
-
+// serve static files in Express
 app.use(express.static('public'));
 
 // use page routing
 app.use('/', indexRouter);
 app.use('/topic', topicRouter);
 
+/*
+app.get('*', function(request, response, next) {
+  console.log('request is ', request);
+  connection.query(`SELECT * FROM topic`, (error, rows, fields) => {
+    console.log('request is ', request);
+    request.list = rows;
+    
+
+  });
+});
+*/
+
+
 // because middlewares execute in order, error handling comes last
 app.use(function(request, response, next){
   response.status(404).send("Sorry, the page cannot be found");
 });
 
+/*
 app.use(function(err, request, response, next) {
   console.log('wtf');
   response.status(500).send("Something broke!");
 });
+*/
 
 app.listen(3000);
