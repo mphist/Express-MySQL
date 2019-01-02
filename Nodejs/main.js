@@ -8,7 +8,7 @@ var helmet = require('helmet');
 var mysql = require('mysql');
 var connection = mysql.createConnection({
   host : 'localhost',
-  user : 'root',
+  user : 'nodejs',
   password : 'test',
   database : 'opentutorials'  
 });
