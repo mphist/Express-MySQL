@@ -1,19 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var path = require('path');
-var fs = require('fs');
-var path = require('path');
 var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
-var mysql = require('mysql');
-var connection = mysql.createConnection({
-  host : 'localhost',
-  user : 'nodejs',
-  password : 'test',
-  database : 'opentutorials'  
-});
-
-connection.connect();
+var connection = require('../lib/db');
 
 router.get('/create', (request, response) => {
   connection.query(`SELECT * FROM topic`, (error, topics, fields) => {
