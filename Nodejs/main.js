@@ -12,7 +12,7 @@ var helmet = require('helmet');
 // middleware functions have access to the request and response objects.
 
 // use the body-parser middleware
-app.use(bodyParser.urlencoded({ extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // serve static files in Express
 app.use(express.static('public'));
@@ -27,9 +27,9 @@ app.use(function(request, response, next){
   response.status(404).send("Sorry, the page cannot be found");
 });
 
-app.use(function(err, request, response, next) {
+/* app.use(function(err, request, response, next) {
   console.log('wtf');
   response.status(500).send("Something broke!");
-});
+}); */
 
 app.listen(3000);

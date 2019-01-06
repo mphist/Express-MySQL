@@ -51,8 +51,33 @@ module.exports = {
       <tr>
         <td>${authors[i].name}</td>
         <td>${authors[i].profile}</td>
-        <td>update</td>
-        <td>delete</td>
+        <td><a href="/author/update/${authors[i].name}" name="update">update</a></td>
+        <td>
+          <form action="/author/delete_process" method="post">
+            <input type="hidden" name="id" value="${authors[i].id}">
+            <input type="submit" name="delete" value="delete">
+          </form>
+          <style>
+            input[name="delete"] {
+              background-color: #4CAF50;
+              border: none;
+              color: red;
+              padding: 3px 4px;
+              text-decoration: none;
+              margin: 4px 2px;
+              cursor: pointer;
+            }
+            a[name="update"] {
+              background-color: #4CAF50;
+              border: none;
+              color: white;
+              padding: 2px 2px;
+              text-decoration: none;
+              margin: 4px 2px;
+              cursor: pointer;
+            }
+          </style>
+        </td>
       </tr>
       `
       i++;
