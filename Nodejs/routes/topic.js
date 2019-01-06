@@ -4,6 +4,7 @@ var path = require('path');
 var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var connection = require('../lib/db');
+var auth = require('../lib/auth');
 
 router.get('/create', (request, response) => {
   connection.query(`SELECT * FROM topic`, (error, topics, fields) => {
@@ -15,7 +16,7 @@ router.get('/create', (request, response) => {
           throw error2;
         } else {
           request.list = topics;
-          var title = 'WEB - create';       
+          var title = 'create';       
           var list = template.list(request.list);
           var html = template.HTML(title, list, `
             <form action="/topic/create_process" method="post">
@@ -30,7 +31,7 @@ router.get('/create', (request, response) => {
                 <input type="submit">
               </p>
             </form>
-          `, '');
+          `, '', auth.StatusUI(request, response));
           response.writeHead(200);
           response.end(html);
         }
@@ -85,7 +86,8 @@ router.get('/update/:pageId', (request, response) => {
                     </p>
                   </form>
                   `,
-                  `<a href="/create">create</a> <a href="/update/${title}">update</a>`
+                  `<a href="/create">create</a> <a href="/update/${title}">update</a>`,
+                  auth.StatusUI(request, response)
                 );
                 response.send(html);
               }
@@ -155,7 +157,7 @@ router.get('/:pageId', (request, response, next) => {
                 <form action="/topic/delete_process" method="post">
                   <input type="hidden" name="id" value="${request.result[0].id}">
                   <input type="submit" value="delete">
-                </form>`
+                </form>`, auth.StatusUI(request, response)
             );
             response.writeHead(200);
             response.end(html);

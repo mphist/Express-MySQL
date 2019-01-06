@@ -4,6 +4,7 @@ var app = express();
 var topicRouter = require('./routes/topic');
 var indexRouter = require('./routes/index');
 var authorRouter = require('./routes/author');
+var authRouter = require('./routes/auth');
 var helmet = require('helmet');
 
 // Use the Helmet middleware for security - displaying raw html?
@@ -21,6 +22,7 @@ app.use(express.static('public'));
 app.use('/', indexRouter);
 app.use('/topic', topicRouter);
 app.use('/author', authorRouter);
+app.use('/auth', authRouter);
 
 // because middlewares execute in order, error handling comes last
 app.use(function(request, response, next){

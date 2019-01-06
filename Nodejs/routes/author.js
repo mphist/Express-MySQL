@@ -3,6 +3,7 @@ var router = express.Router();
 var template = require('../lib/template');
 var path = require('path');
 var connection = require('../lib/db');
+var auth = require('../lib/auth');
 
 router.get('/', (request, response) => {
     connection.query(`SELECT * FROM topic`, (error, topics) => {
@@ -33,7 +34,7 @@ router.get('/', (request, response) => {
                 </p>
             </form>
             `;
-            var html = template.HTML(title, list, body, '');
+            var html = template.HTML(title, list, body, '', auth.StatusUI(request, response));
             response.send(html);
         });
     });

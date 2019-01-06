@@ -1,11 +1,12 @@
 var sanitizeHtml = require('sanitize-html');
 
 module.exports = {
-  HTML:function(title, list, body, control){
+  HTML:function(title, list, body, control, authStatusUI='<a href="/auth/login">login</a>'){
     return `
     <!doctype html>
     <html>
     <head>
+      ${authStatusUI}
       <title>WEB1 - ${title}</title>
       <meta charset="utf-8">
     </head>
