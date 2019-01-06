@@ -1,3 +1,5 @@
+var sanitizeHtml = require('sanitize-html');
+
 module.exports = {
   HTML:function(title, list, body, control){
     return `
@@ -21,7 +23,7 @@ module.exports = {
     var list = '<ul>';
     var i = 0;
     while(i < filelist.length){
-      list = list + `<li><a href="/topic/${filelist[i].title}">${filelist[i].title}</a></li>`;
+      list = list + `<li><a href="/topic/${sanitizeHtml(filelist[i].title)}">${sanitizeHtml(filelist[i].title)}</a></li>`;
       i = i + 1;
     }
     list = list+'</ul>';
@@ -49,8 +51,8 @@ module.exports = {
     while (i < authors.length) {
       tag += `
       <tr>
-        <td>${authors[i].name}</td>
-        <td>${authors[i].profile}</td>
+        <td>${sanitizeHtml(authors[i].name)}</td>
+        <td>${sanitizeHtml(authors[i].profile)}</td>
         <td><a href="/author/update/${authors[i].name}" name="update">update</a></td>
         <td>
           <form action="/author/delete_process" method="post">

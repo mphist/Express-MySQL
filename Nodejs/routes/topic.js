@@ -41,9 +41,9 @@ router.get('/create', (request, response) => {
 
 router.post('/create_process', (request, response) => {
   var post = request.body;
-  var title = post.title;
-  var description = post.description;
-  var author = post.authors;
+  var title = sanitizeHtml(post.title);
+  var description = sanitizeHtml(post.description);
+  var author = sanitizeHtml(post.authors);
   var query = connection.query(`INSERT INTO topic (title, description, created, author_id) VALUES (?,?,NOW(),?)`, 
     [title, description, author], (error, rows, fields) => {
     response.redirect(`/topic/${title}`);
@@ -73,12 +73,12 @@ router.get('/update/:pageId', (request, response) => {
                   `
                   <form action="/topic/update_process" method="post">
                     <input type="hidden" name="id" value="${request.result[0].id}">
-                    <p><input type="text" name="title" placeholder="title" value="${title}"></p>
+                    <p><input type="text" name="title" placeholder="title" value="${sanitizeHtml(title)}"></p>
                     <p>
-                      <textarea name="description" placeholder="description">${description}</textarea>
+                      <textarea name="description" placeholder="description">${sanitizeHtml(description)}</textarea>
                     </p>
                     <p>
-                      ${template.authorSelect(authors, result[0].author_id)}
+                      ${template.authorSelect(authors, sanitizeHtml(result[0].author_id))}
                     </p>
                     <p>
                       <input type="submit">
@@ -98,10 +98,10 @@ router.get('/update/:pageId', (request, response) => {
 
 router.post('/update_process', (request, response) => {
   var post = request.body;
-  var id = post.id;
-  var title = post.title;
-  var description = post.description;
-  var author = post.authors;
+  var id = sanitizeHtml(post.id);
+  var title = sanitizeHtml(post.title);
+  var description = sanitizeHtml(post.description);
+  var author = sanitizeHtml(post.authors);
   connection.query(`UPDATE topic SET title = ?, description = ?, author_id = ? WHERE id = ?`, [title, description, author, id], (error, rows, fields) => {
     if (error) {
       throw error;
