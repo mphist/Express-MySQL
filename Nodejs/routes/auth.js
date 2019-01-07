@@ -56,6 +56,12 @@ router.post('/login_process', (request, response) => {
   }
 });
 
+router.get('/logout', (request, response) => {
+  request.session.destroy((err) => {
+    response.redirect('/');
+  });
+});
+
 
 /* router.get('/create', (request, response) => {
   connection.query(`SELECT * FROM topic`, (error, topics, fields) => {
