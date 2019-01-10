@@ -1,10 +1,12 @@
 var bodyParser = require('body-parser');
 var express = require('express');
 var app = express();
+var router = express.Router();
+var passport = require('./lib/passport')(router);
 var topicRouter = require('./routes/topic');
-var indexRouter = require('./routes/index');
+var indexRouter = require('./routes/index')(passport);
 var authorRouter = require('./routes/author');
-var authRouter = require('./routes/auth');
+var authRouter = require('./routes/auth')(passport);
 var helmet = require('helmet');
 
 // Use the Helmet middleware for security - displaying raw html?
