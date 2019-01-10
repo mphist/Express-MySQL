@@ -59,6 +59,31 @@ router.get(`/update/:pageId`, (request, response) => {
             connection.query(`SELECT * from author WHERE name = ?`, [filteredId], (error3, author) => {
                 var title = 'author';
                 var list = template.list(topics);
+                function updateOrNot() {
+                    if (request.session.passport) {
+                        return `
+                        <p>
+                            <input type="text" name="name" placeholder="name" value="${author[0].name}"></input>
+                        </p>
+                        <p>
+                            <textarea name="profile" placeholder="profile">${author[0].profile}</textarea>
+                        </p>
+                        `
+                    } else {
+                        return `
+                        <p>
+                            <input type="text" name="name" placeholder="name"></input>
+                        </p>
+                        <p>
+                            <textarea name="profile" placeholder="profile"></textarea>
+                        </p>
+                        <script>
+                            alert('You must be logged in to update the author list');
+                            location.href='/author';
+                        </script>
+                        `
+                    }
+                }
                 var body = `
                     <table>
                         ${template.authorTable(authors)}
@@ -73,18 +98,13 @@ router.get(`/update/:pageId`, (request, response) => {
                     </style>
                     <form action="/author/update_author_process" method="post">
                         <input type="hidden" name="id" value="${author[0].id}">
-                        <p>
-                            <input type="text" name="name" placeholder="name" value="${author[0].name}"></input>
-                        </p>
-                        <p>
-                            <textarea name="profile" placeholder="profile">${author[0].profile}</textarea>
-                        </p>
+                        ${updateOrNot()}
                         <p>
                             <input type="submit" value="update">
                         </p>
                     </form>
-                `;
-                var html = template.HTML(title, list, body, '');
+                    `;
+                var html = template.HTML(title, list, body, '', auth.StatusUI(request, response));
                 response.send(html);
                 });      
         });
@@ -101,10 +121,19 @@ router.post('/update_author_process', (request, response) => {
 });
 
 router.post('/delete_process', (request, response) => {
-    var id = request.body.id;
-    connection.query(`DELETE FROM author WHERE id = ?`, [id], (error, author) => {
-        response.redirect('/author');
-    });
+    if(request.session.passport) {
+        var id = request.body.id;
+        connection.query(`DELETE FROM author WHERE id = ?`, [id], (error, author) => {
+            response.redirect('/author');
+        });
+    } else {
+        response.send(`<script>
+                        alert('You must be logged in to delete from the author list');
+                        location.href='/author';
+                       </script>
+        `);
+    }
+    
 })
 
 module.exports = router;

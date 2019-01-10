@@ -18,7 +18,9 @@ router.get('/create', (request, response) => {
           request.list = topics;
           var title = 'create';       
           var list = template.list(request.list);
-          var html = template.HTML(title, list, `
+          var body = '';
+          if (request.session.passport) {
+            body = `
             <form action="/topic/create_process" method="post">
               <p><input type="text" name="title" placeholder="title"></p>
               <p>
@@ -31,7 +33,11 @@ router.get('/create', (request, response) => {
                 <input type="submit">
               </p>
             </form>
-          `, '', auth.StatusUI(request, response));
+          `;
+          } else {
+            body = 'You must be logged in to create a topic';
+          }
+          var html = template.HTML(title, list, body, '', auth.StatusUI(request, response));
           response.writeHead(200);
           response.end(html);
         }
@@ -70,8 +76,9 @@ router.get('/update/:pageId', (request, response) => {
                 var title = filteredId;
                 var description = request.result[0].description;
                 var list = template.list(request.list);
-                var html = template.HTML(title, list,
-                  `
+                var body = '';
+                if (request.session.passport) {
+                  body = `
                   <form action="/topic/update_process" method="post">
                     <input type="hidden" name="id" value="${request.result[0].id}">
                     <p><input type="text" name="title" placeholder="title" value="${sanitizeHtml(title)}"></p>
@@ -85,8 +92,12 @@ router.get('/update/:pageId', (request, response) => {
                       <input type="submit">
                     </p>
                   </form>
-                  `,
-                  `<a href="/create">create</a> <a href="/update/${title}">update</a>`,
+                  `;
+                } else {
+                  body = 'You must be logged in to update a topic';
+                }
+                var html = template.HTML(title, list, body,
+                  `<div><a href="/topic/create">create</a> <a href="/topic/update/${title}">update</a></div>`,
                   auth.StatusUI(request, response)
                 );
                 response.send(html);
@@ -115,14 +126,22 @@ router.post('/update_process', (request, response) => {
 });
 
 router.post('/delete_process', (request, response) => {
-  var filteredId = path.parse(request.body.id).base;
-  connection.query(`DELETE FROM topic WHERE id = ?`, [filteredId], (error, rows) => {
-    if (error) {
-      throw error;
-    } else {
-      response.redirect("/");
-    }
-  });
+  if (request.session.passport) {
+    var filteredId = path.parse(request.body.id).base;
+    connection.query(`DELETE FROM topic WHERE id = ?`, [filteredId], (error, rows) => {
+      if (error) {
+        throw error;
+      } else {
+        response.redirect("/");
+      }
+    });
+  } else {
+    //response.redirect('/');
+    response.send(`<script>
+                    alert('You must be logged in to delete a topic');
+                    location.href="/";
+                   </script>`);
+  }
 });
 
 router.get('/:pageId', (request, response, next) => {
