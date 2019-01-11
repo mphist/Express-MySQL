@@ -72,5 +72,48 @@ module.exports = function(passport) {
     });
   });
 
+  router.get('/register', (request, response) => {
+    connection.query(`SELECT * FROM topic`, (error1, topics, fields) => {
+      if (error1) {
+        throw error1;
+      } else {
+        connection.query(`SELECT * FROM author`, (error2, authors) => {
+          if (error2) {
+            throw error2;
+          } else {
+            request.list = topics;
+            var title = 'register';       
+            var list = template.list(request.list);
+            var login_error = request.flash().error;
+            var html = template.HTML(title, list, `
+              <p>${login_error ? login_error : ''}</p>
+              <form action="/auth/register_process" method="post">
+                <p><input type="text" name="id" placeholder="enter id"></p>
+                <p>
+                  <input type="password" name="pw" placeholder="enter password">
+                </p>
+                <p>
+                  <input type="password" name="pw2" placeholder="re-enter password">
+                </p>
+                <p>
+                  <input type="text" name="displayName" placeholder="enter a display name">
+                </p>
+                <p>
+                  <input type="submit" value="register">
+                </p>
+              </form>
+            `, '');
+            response.writeHead(200);
+            response.end(html);
+          }
+        });
+      }
+    });
+  });
+
+  router.post('/register_process', (request, response) => {
+    
+  });
+  
   return router;
 }

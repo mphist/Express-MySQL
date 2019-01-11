@@ -1,7 +1,7 @@
 var sanitizeHtml = require('sanitize-html');
 
 module.exports = {
-  HTML:function(title, list, body, control, authStatusUI='<a href="/auth/login">login</a>'){
+  HTML:function(title, list, body, control, authStatusUI='<a href="/auth/login">login</a> | <a href="/auth/register">register</a>'){
     return `
     <!doctype html>
     <html>
