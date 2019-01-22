@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/web-n/Nodejs#readme",
   "dependencies": {
+    "bcrypt": "^3.0.3",
     "connect-flash": "^0.1.1",
     "express": "^4.16.4",
     "mysql": "^2.16.0",

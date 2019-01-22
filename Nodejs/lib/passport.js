@@ -1,21 +1,21 @@
+var connection = require('../lib/db');
+var bcrypt = require('bcrypt');
+
 module.exports = function(router) {
     var passport = require('passport')
     , LocalStrategy = require('passport-local').Strategy;
 
-    var authData = {
-        id: 'hooni88',
-        password: 'test',
-        nickname: 'hooni'
-    };
-
     passport.serializeUser(function(user, done) {
         console.log('serailize ', user);
-        done(null, user.id);
+        console.log('serialzie2', JSON.parse(user))
+        done(null, JSON.parse(user).id);
     });
     
     passport.deserializeUser(function(id, done) {
         console.log('deserialize ', id);
-        done(null, authData);
+        connection.query(`SELECT * FROM authData WHERE JSON_EXTRACT(jdoc, '$.id') = ?`, [id], (err, rows) => {
+            done(err, rows[0]);
+        });   
     });
 
     passport.use(new LocalStrategy({
@@ -23,18 +23,29 @@ module.exports = function(router) {
         passwordField: 'pw'
     },
         function(username, password, done) {
+
             console.log(username, password);
-            if (username === authData.id) {
-                if (password === authData.password) {
-                    return done(null, authData)
+            var query = connection.query(`SELECT * FROM authData WHERE JSON_EXTRACT(jdoc, '$.id') = ?`, [username], (err, rows) => {
+                console.log('query result', rows[0].jdoc)
+                console.log(username, JSON.parse(rows[0].jdoc).id)
+                if (username === JSON.parse(rows[0].jdoc).id) {
+                    var hash = JSON.parse(rows[0].jdoc).password;
+                    bcrypt.compare(password, hash, function(err, res) {
+                        console.log('login', password, hash);
+                        // res == true
+                        if (res) {
+                            return done(null, rows[0].jdoc)
+                        } else {
+                            console.log('wrong password');
+                            return done(null, false, { message: 'Incorrect password.' });
+                        }
+                    });
                 } else {
-                    console.log('wrong password');
-                    return done(null, false, { message: 'Incorrect password.' });
+                    console.log('wrong id');
+                    return done(null, false, { message: 'Incorrect id.' });
                 }
-            } else {
-                console.log('wrong id');
-                return done(null, false, { message: 'Incorrect id.' });
-            }
+            });
+            console.log(query.sql);
         }
     ));
     return passport;
