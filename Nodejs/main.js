@@ -36,4 +36,4 @@ app.use(function(request, response, next){
   response.status(500).send("Something broke!");
 }); */
 
-app.listen(3000);
+app.listen(process.env.PORT || 3000);
