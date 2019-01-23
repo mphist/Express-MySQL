@@ -5,7 +5,7 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var connection = require('../lib/db');
 var flash = require('connect-flash');
-var bcrypt = require('bcrypt');
+var bcrypt = require('../main.js').bcrypt;
 
 module.exports = function(passport) {
   router.use(flash());

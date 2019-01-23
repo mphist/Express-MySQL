@@ -8,6 +8,8 @@ var indexRouter = require('./routes/index')(passport);
 var authorRouter = require('./routes/author');
 var authRouter = require('./routes/auth')(passport);
 var helmet = require('helmet');
+var bcrypt = require('bcrypt');
+module.exports.bcrypt = bcrypt;
 
 // Use the Helmet middleware for security - displaying raw html?
 //app.use(helmet());

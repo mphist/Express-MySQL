@@ -1,5 +1,5 @@
 var connection = require('../lib/db');
-var bcrypt = require('bcrypt');
+var bcrypt = require('../main.js').bcrypt;
 
 module.exports = function(router) {
     var passport = require('passport')
