@@ -5,7 +5,7 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var connection = require('../lib/db');
 var flash = require('connect-flash');
-var bcrypt = require('../main.js').bcrypt;
+var bcrypt = require('bcrypt-nodejs');
 
 module.exports = function(passport) {
   router.use(flash());
@@ -117,7 +117,7 @@ module.exports = function(passport) {
 
   router.post('/register_process', (request, response) => {
     if (request.body.pw === request.body.pw2) {
-      bcrypt.hash(request.body.pw, 10, function(err, hash) {
+      bcrypt.hash(request.body.pw, null, null, function(err, hash) {
         // Store hash in your password DB.
         var user = JSON.stringify({"id": request.body.id,
                   "password": hash,

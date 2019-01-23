@@ -1,5 +1,5 @@
 var connection = require('../lib/db');
-var bcrypt = require('../main.js').bcrypt;
+var bcrypt = require('bcrypt-nodejs');
 
 module.exports = function(router) {
     var passport = require('passport')
@@ -26,24 +26,33 @@ module.exports = function(router) {
 
             console.log(username, password);
             var query = connection.query(`SELECT * FROM authData WHERE JSON_EXTRACT(jdoc, '$.id') = ?`, [username], (err, rows) => {
-                console.log('query result', rows[0].jdoc)
-                console.log(username, JSON.parse(rows[0].jdoc).id)
-                if (username === JSON.parse(rows[0].jdoc).id) {
-                    var hash = JSON.parse(rows[0].jdoc).password;
-                    bcrypt.compare(password, hash, function(err, res) {
-                        console.log('login', password, hash);
-                        // res == true
-                        if (res) {
-                            return done(null, rows[0].jdoc)
-                        } else {
-                            console.log('wrong password');
-                            return done(null, false, { message: 'Incorrect password.' });
-                        }
-                    });
+                if (err) {
+                    throw err;
                 } else {
-                    console.log('wrong id');
-                    return done(null, false, { message: 'Incorrect id.' });
-                }
+                    if (rows[0]) {
+                        console.log('query result', rows[0].jdoc)
+                        console.log(username, JSON.parse(rows[0].jdoc).id)
+                        if (username === JSON.parse(rows[0].jdoc).id) {
+                            var hash = JSON.parse(rows[0].jdoc).password;
+                            bcrypt.compare(password, hash, function(err, res) {
+                                console.log('login', password, hash);
+                                // res == true
+                                if (res) {
+                                    return done(null, rows[0].jdoc)
+                                } else {
+                                    console.log('wrong password');
+                                    return done(null, false, { message: 'Incorrect password.' });
+                                }
+                            });
+                        } else {
+                            console.log('wrong id');
+                            return done(null, false, { message: 'Incorrect id.' });
+                        }
+                    } else {
+                        console.log('nonexistent id');
+                        return done(null, false, { message: "Id doesn't exist." });
+                    }           
+                }  
             });
             console.log(query.sql);
         }
