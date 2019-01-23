@@ -18,7 +18,8 @@ var helmet = require('helmet');
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // serve static files in Express
-app.use(express.static('public'));
+//app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
 // use page routing
 app.use('/', indexRouter);
