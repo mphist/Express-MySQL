@@ -2,7 +2,7 @@
   "name": "web2-nodejs",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "Nodejs/main.js",
   "directories": {
     "lib": "lib"
   },
