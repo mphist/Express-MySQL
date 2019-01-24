@@ -1,9 +1,13 @@
 var { Pool, Client } = require('pg');
-var client = new Client({
+/* var client = new Client({
   host : 'localhost',
   user : 'nodejs',
-  password : 'test',
+  password : '',
   database : 'opentutorials'  
+}); */
+
+var client = new Client({
+  connectionString: process.env.DATABASE_URL
 });
   
 
