@@ -15,7 +15,7 @@ router.get('/create', (request, response) => {
         if (error2) {
           throw error2;
         } else {
-          request.list = topics;
+          request.list = topics.rows;
           var title = 'create';       
           var list = template.list(request.list);
           var body = '';
@@ -27,7 +27,7 @@ router.get('/create', (request, response) => {
                 <textarea name="description" placeholder="description"></textarea>
               </p>
               <p>
-                ${template.authorSelect(authors)}
+                ${template.authorSelect(authors.rows)}
               </p>
               <p>
                 <input type="submit">
@@ -51,7 +51,7 @@ router.post('/create_process', (request, response) => {
   var title = sanitizeHtml(post.title);
   var description = sanitizeHtml(post.description);
   var author = sanitizeHtml(post.authors);
-  var query = connection.query(`INSERT INTO topic (title, description, created, author_id) VALUES (?,?,NOW(),?)`, 
+  var query = connection.query(`INSERT INTO topic (title, description, created, author_id) VALUES ($1,$2,NOW(),$3)`, 
     [title, description, author], (error, rows, fields) => {
     response.redirect(`/topic/${title}`);
   });
@@ -59,12 +59,13 @@ router.post('/create_process', (request, response) => {
 
 router.get('/update/:pageId', (request, response) => {
   var filteredId = path.parse(request.params.pageId).base;
-  connection.query(`SELECT * FROM topic`, (error1, rows, fields) => {
+  connection.query(`SELECT * FROM topic`, (error1, topics, fields) => {
     if (error1) {
       throw error1;
     } else {
-      request.list = rows;
-      connection.query(`SELECT * FROM topic WHERE title = "${filteredId}"`, (error2, result) => {
+      request.list = topics.rows;
+      connection.query(`SELECT * FROM topic WHERE title = $1`, [filteredId], (error2, result) => {
+        console.log('*****',result.rows)
         if (error2) {
           throw error2;
         } else {
@@ -72,7 +73,7 @@ router.get('/update/:pageId', (request, response) => {
             if (error3) {
               throw error3;
             } else {
-                request.result = result;
+                request.result = result.rows;
                 var title = filteredId;
                 var description = request.result[0].description;
                 var list = template.list(request.list);
@@ -86,7 +87,7 @@ router.get('/update/:pageId', (request, response) => {
                       <textarea name="description" placeholder="description">${sanitizeHtml(description)}</textarea>
                     </p>
                     <p>
-                      ${template.authorSelect(authors, sanitizeHtml(result[0].author_id))}
+                      ${template.authorSelect(authors.rows, sanitizeHtml(result.rows[0].author_id))}
                     </p>
                     <p>
                       <input type="submit">
@@ -115,7 +116,7 @@ router.post('/update_process', (request, response) => {
   var title = sanitizeHtml(post.title);
   var description = sanitizeHtml(post.description);
   var author = sanitizeHtml(post.authors);
-  connection.query(`UPDATE topic SET title = ?, description = ?, author_id = ? WHERE id = ?`, [title, description, author, id], (error, rows, fields) => {
+  connection.query(`UPDATE topic SET title = $1, description = $2, author_id = $3 WHERE id = $4`, [title, description, author, id], (error, rows, fields) => {
     if (error) {
       throw error;
     } else {
@@ -128,7 +129,7 @@ router.post('/update_process', (request, response) => {
 router.post('/delete_process', (request, response) => {
   if (request.session.passport) {
     var filteredId = path.parse(request.body.id).base;
-    connection.query(`DELETE FROM topic WHERE id = ?`, [filteredId], (error, rows) => {
+    connection.query(`DELETE FROM topic WHERE id = $1`, [filteredId], (error, rows) => {
       if (error) {
         throw error;
       } else {
@@ -147,18 +148,18 @@ router.post('/delete_process', (request, response) => {
 router.get('/:pageId', (request, response, next) => {
   var filteredId = path.parse(request.params.pageId).base;
   var title = filteredId;
-  connection.query(`SELECT * FROM topic`, (error, rows, fields) => {
+  connection.query(`SELECT * FROM topic`, (error, topics, fields) => {
     if (error) {
       throw(error);
     } else {
         // need to override the id in RowDataPacket by topic.id
-        connection.query(`SELECT *, topic.id FROM topic LEFT JOIN author ON topic.author_id = author.id WHERE title = "${title}"`, (error2, results) => {
+        connection.query(`SELECT *, topic.id FROM topic LEFT JOIN author ON topic.author_id = author.id WHERE title = '${title}'`, (error2, results) => {
           if (error2) {
             throw error2;
           }
           else {
-            request.list = rows;
-            request.result = results;
+            request.list = topics.rows;
+            request.result = results.rows;
             var description = request.result[0].description;
             var sanitizedTitle = sanitizeHtml(title);
             var sanitizedDescription = sanitizeHtml(description, {

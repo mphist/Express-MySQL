@@ -18,7 +18,7 @@ module.exports = function(passport) {
           if (error2) {
             throw error2;
           } else {
-            request.list = topics;
+            request.list = topics.rows;
             var title = 'login';       
             var list = template.list(request.list);
             var login_error = request.flash().error;
@@ -82,7 +82,7 @@ module.exports = function(passport) {
           if (error2) {
             throw error2;
           } else {
-            request.list = topics;
+            request.list = topics.rows;
             var title = 'register';       
             var list = template.list(request.list);
             var error_id = request.flash('error_id');
@@ -123,9 +123,10 @@ module.exports = function(passport) {
                   "password": hash,
                   "nickname": request.body.displayName
         });
-        connection.query(`SELECT * from authData WHERE JSON_EXTRACT(jdoc, '$.id') = ?`, request.body.id, (err, rows) => {
-          if (!rows.length) {
-            connection.query(`INSERT INTO authData VALUES ('{"id": "${request.body.id}", "password": "${hash}", 
+        connection.query(`SELECT * from authData WHERE info ->> 'id' = $1`, [request.body.id], (err, res) => {
+          console.log('register process', res);
+          if (!res.rows.length) {
+            connection.query(`INSERT INTO authData (info) VALUES ('{"id": "${request.body.id}", "password": "${hash}", 
                                                                   "nickname": "${request.body.displayName}"}')`, (err, results) => {
               request.login(user, (err) => {
                 console.log('register process user', user)

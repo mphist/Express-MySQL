@@ -19,8 +19,9 @@ module.exports = function(passport) {
 
     router.get('/', (request, response) => {
         console.log(request.session);
-        connection.query(`SELECT * FROM topic`, (error, rows, fields) => {
-            request.list = rows;
+        connection.query(`SELECT * FROM topic`, (error, res, fields) => {
+            console.log('postgresql ', res.rows);
+            request.list = res.rows;
             var title = 'Welcome';
             var description = 'Hello, Node.js';
             

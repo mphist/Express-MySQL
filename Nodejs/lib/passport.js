@@ -7,14 +7,13 @@ module.exports = function(router) {
 
     passport.serializeUser(function(user, done) {
         console.log('serailize ', user);
-        console.log('serialzie2', JSON.parse(user))
-        done(null, JSON.parse(user).id);
+        done(null, user.id);
     });
     
     passport.deserializeUser(function(id, done) {
         console.log('deserialize ', id);
-        connection.query(`SELECT * FROM authData WHERE JSON_EXTRACT(jdoc, '$.id') = ?`, [id], (err, rows) => {
-            done(err, rows[0]);
+        connection.query(`SELECT * FROM authData WHERE info ->> 'id' = $1`, [id], (err, result) => {
+            done(err, result.rows[0]);
         });   
     });
 
@@ -24,21 +23,21 @@ module.exports = function(router) {
     },
         function(username, password, done) {
 
-            console.log(username, password);
-            var query = connection.query(`SELECT * FROM authData WHERE JSON_EXTRACT(jdoc, '$.id') = ?`, [username], (err, rows) => {
+            console.log(JSON.stringify(username), password);
+            var query = connection.query(`SELECT * FROM authData WHERE info ->> 'id' = $1`, [username], (err, result) => {
                 if (err) {
                     throw err;
                 } else {
-                    if (rows[0]) {
-                        console.log('query result', rows[0].jdoc)
-                        console.log(username, JSON.parse(rows[0].jdoc).id)
-                        if (username === JSON.parse(rows[0].jdoc).id) {
-                            var hash = JSON.parse(rows[0].jdoc).password;
+                    if (result.rows[0]) {
+                        console.log('query result', result.rows[0])
+                        console.log('what is this', username, result.rows[0].info.id)
+                        if (username === result.rows[0].info.id) {
+                            var hash = result.rows[0].info.password;
                             bcrypt.compare(password, hash, function(err, res) {
                                 console.log('login', password, hash);
                                 // res == true
                                 if (res) {
-                                    return done(null, rows[0].jdoc)
+                                    return done(null, result.rows[0].info)
                                 } else {
                                     console.log('wrong password');
                                     return done(null, false, { message: 'Incorrect password.' });
@@ -54,7 +53,7 @@ module.exports = function(router) {
                     }           
                 }  
             });
-            console.log(query.sql);
+            //console.log('wanna see sql',query);
         }
     ));
     return passport;

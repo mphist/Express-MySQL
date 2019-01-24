@@ -9,10 +9,10 @@ router.get('/', (request, response) => {
     connection.query(`SELECT * FROM topic`, (error, topics) => {
         connection.query(`SELECT * FROM author`, (error2, authors) => {
             var title = 'author';
-            var list = template.list(topics);
+            var list = template.list(topics.rows);
             var body = `
             <table>
-                ${template.authorTable(authors)}
+                ${template.authorTable(authors.rows)}
             </table>
             <style>
                 table {
@@ -43,7 +43,7 @@ router.get('/', (request, response) => {
 router.post('/create_author_process', (request, response) => {
     var name = request.body.name;
     var profile = request.body.profile;
-    connection.query(`INSERT INTO author (name, profile) VALUES (?,?)`, 
+    connection.query(`INSERT INTO author (name, profile) VALUES ($1,$2)`, 
         [name, profile], (error, author) => {
         if (error) {
             throw error;
@@ -56,17 +56,17 @@ router.get(`/update/:pageId`, (request, response) => {
     var filteredId = path.parse(request.params.pageId).base;
     connection.query(`SELECT * from topic`, (error, topics) => {
         connection.query(`SELECT * from author`, (error2, authors) => {
-            connection.query(`SELECT * from author WHERE name = ?`, [filteredId], (error3, author) => {
+            connection.query(`SELECT * from author WHERE name = $1`, [filteredId], (error3, author) => {
                 var title = 'author';
-                var list = template.list(topics);
+                var list = template.list(topics.rows);
                 function updateOrNot() {
                     if (request.session.passport) {
                         return `
                         <p>
-                            <input type="text" name="name" placeholder="name" value="${author[0].name}"></input>
+                            <input type="text" name="name" placeholder="name" value="${author.rows[0].name}"></input>
                         </p>
                         <p>
-                            <textarea name="profile" placeholder="profile">${author[0].profile}</textarea>
+                            <textarea name="profile" placeholder="profile">${author.rows[0].profile}</textarea>
                         </p>
                         `
                     } else {
@@ -86,7 +86,7 @@ router.get(`/update/:pageId`, (request, response) => {
                 }
                 var body = `
                     <table>
-                        ${template.authorTable(authors)}
+                        ${template.authorTable(authors.rows)}
                     </table>
                     <style>
                         table {
@@ -97,7 +97,7 @@ router.get(`/update/:pageId`, (request, response) => {
                         }
                     </style>
                     <form action="/author/update_author_process" method="post">
-                        <input type="hidden" name="id" value="${author[0].id}">
+                        <input type="hidden" name="id" value="${author.rows[0].id}">
                         ${updateOrNot()}
                         <p>
                             <input type="submit" value="update">
@@ -115,7 +115,7 @@ router.post('/update_author_process', (request, response) => {
     var name = request.body.name;
     var profile = request.body.profile;
     var id = request.body.id
-    connection.query(`UPDATE author SET name = ?, profile = ? WHERE id = ?`, [name, profile, id], (error, author) => {
+    connection.query(`UPDATE author SET name = $1, profile = $2 WHERE id = $3`, [name, profile, id], (error, author) => {
         response.redirect(`/author`);
     });
 });
@@ -123,7 +123,7 @@ router.post('/update_author_process', (request, response) => {
 router.post('/delete_process', (request, response) => {
     if(request.session.passport) {
         var id = request.body.id;
-        connection.query(`DELETE FROM author WHERE id = ?`, [id], (error, author) => {
+        connection.query(`DELETE FROM author WHERE id = $1`, [id], (error, author) => {
             response.redirect('/author');
         });
     } else {

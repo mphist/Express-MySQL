@@ -1,11 +1,12 @@
-var mysql = require('mysql');
-var connection = mysql.createConnection({
+var { Pool, Client } = require('pg');
+var client = new Client({
   host : 'localhost',
   user : 'nodejs',
   password : 'test',
   database : 'opentutorials'  
 });
+  
 
-connection.connect();
+client.connect();
 
-module.exports = connection;
+module.exports = client;
