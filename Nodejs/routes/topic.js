@@ -51,6 +51,7 @@ router.post('/create_process', (request, response) => {
   var title = sanitizeHtml(post.title);
   var description = sanitizeHtml(post.description);
   var author = sanitizeHtml(post.authors);
+  console.log(post.title, post.authors);
   var query = connection.query(`INSERT INTO topic (title, description, created, author_id) VALUES ($1,$2,NOW(),$3)`, 
     [title, description, author], (error, rows, fields) => {
     response.redirect(`/topic/${title}`);

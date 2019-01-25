@@ -39,7 +39,7 @@ module.exports = {
       if (author_id == author.id) {
         selected = ' selected';
       }
-      tag += `<option value="${author_id}"${selected}>${author.name}</option>`;
+      tag += `<option value="${author.id}"${selected}>${author.name}</option>`;
       i++;
     }
     return (
