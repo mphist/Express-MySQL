@@ -6,13 +6,23 @@ module.exports = {
     <!doctype html>
     <html>
     <head>
+      <link rel="stylesheet" type="text/css" href="../search.css">
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
       ${authStatusUI}
       <title>WEB1 - ${title}</title>
       <meta charset="utf-8">
     </head>
     <body>
       <h1><a href="/">WEB</a></h1>
-      <a href="/author">author</a>
+      <div class="search">
+        <form action="/search" method="get">
+          <input type="text" name="q" placeholder="search...">
+          <button type="submit"><i class="fa fa-search"></i></button>
+        </form>
+      </div>
+      <p>
+        <a href="/author">author</a>
+      </p>
       ${list}
       ${control}
       ${body}
